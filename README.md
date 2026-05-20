@@ -2,4 +2,4 @@
 
 ### لوحة تحليل المبيعات وسلوك العملاء
 
-Power BI dashboard analyzing sales performance, customer behavior, and regional trends using real-world structured data.
+Interactive sales dashboard built with HTML, CSS, and JavaScript.
