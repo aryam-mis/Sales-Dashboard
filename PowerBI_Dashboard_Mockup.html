@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales & Customer Insights Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2230;
+    --border: #21262d;
+    --accent: #2563eb;
+    --accent2: #7c3aed;
+    --accent3: #059669;
+    --accent4: #d97706;
+    --accent5: #dc2626;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --card-glow: rgba(37,99,235,0.08);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, #0d1117 0%, #1a1f35 50%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: 10%;
+    width: 300px; height: 200px;
+    background: radial-gradient(ellipse, rgba(37,99,235,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+  .header h1 span { color: var(--accent); }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .badge {
+    background: rgba(37,99,235,0.15);
+    border: 1px solid rgba(37,99,235,0.3);
+    color: #60a5fa;
+    font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+  .date-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px; font-weight: 500;
+    padding: 4px 12px; border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Filter Bar ── */
+  .filters {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 32px;
+    display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap;
+  }
+  .filter-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-right: 4px; }
+  .filter-chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 11px; font-weight: 500;
+    padding: 5px 14px; border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Outfit', sans-serif;
+  }
+  .filter-chip.active {
+    background: rgba(37,99,235,0.2);
+    border-color: rgba(37,99,235,0.5);
+    color: #60a5fa;
+  }
+  .filter-divider { width: 1px; height: 20px; background: var(--border); margin: 0 6px; }
+
+  /* ── Main Grid ── */
+  .main { padding: 24px 32px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* ── KPI Cards ── */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .kpi-card.blue::before  { background: linear-gradient(90deg, var(--accent), #60a5fa); }
+  .kpi-card.purple::before { background: linear-gradient(90deg, var(--accent2), #a78bfa); }
+  .kpi-card.green::before  { background: linear-gradient(90deg, var(--accent3), #34d399); }
+  .kpi-card.amber::before  { background: linear-gradient(90deg, var(--accent4), #fbbf24); }
+
+  .kpi-icon {
+    width: 36px; height: 36px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; margin-bottom: 14px;
+  }
+  .kpi-card.blue .kpi-icon   { background: rgba(37,99,235,0.15); }
+  .kpi-card.purple .kpi-icon { background: rgba(124,58,237,0.15); }
+  .kpi-card.green .kpi-icon  { background: rgba(5,150,105,0.15); }
+  .kpi-card.amber .kpi-icon  { background: rgba(217,119,6,0.15); }
+
+  .kpi-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  .kpi-value { font-size: 26px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
+  .kpi-card.blue .kpi-value   { color: #60a5fa; }
+  .kpi-card.purple .kpi-value { color: #a78bfa; }
+  .kpi-card.green .kpi-value  { color: #34d399; }
+  .kpi-card.amber .kpi-value  { color: #fbbf24; }
+
+  .kpi-delta {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 4px;
+  }
+  .kpi-delta.up   { background: rgba(5,150,105,0.15); color: #34d399; }
+  .kpi-delta.down { background: rgba(220,38,38,0.15); color: #f87171; }
+
+  /* ── Chart Row ── */
+  .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    overflow: hidden;
+  }
+  .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .chart-title { font-size: 13px; font-weight: 700; color: var(--text); }
+  .chart-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .chart-actions { display: flex; gap: 6px; }
+  .chart-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 10px; font-weight: 600;
+    padding: 4px 10px; border-radius: 5px;
+    cursor: pointer; font-family: 'Outfit', sans-serif;
+  }
+  .chart-btn.active { background: rgba(37,99,235,0.2); border-color: rgba(37,99,235,0.5); color: #60a5fa; }
+
+  /* Line Chart */
+  .line-chart { position: relative; height: 180px; }
+  .line-chart svg { width: 100%; height: 100%; overflow: visible; }
+
+  /* Donut Chart */
+  .donut-wrap { display: flex; align-items: center; gap: 20px; }
+  .donut-chart { position: relative; width: 140px; height: 140px; flex-shrink: 0; }
+  .donut-chart svg { width: 100%; height: 100%; }
+  .donut-center {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    text-align: center;
+  }
+  .donut-center-val { font-size: 18px; font-weight: 800; color: var(--text); font-family: 'JetBrains Mono', monospace; }
+  .donut-center-lbl { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .donut-legend { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .legend-info { flex: 1; }
+  .legend-name { font-size: 11px; font-weight: 600; color: var(--text); }
+  .legend-pct  { font-size: 10px; color: var(--muted); }
+  .legend-bar-wrap { width: 60px; height: 4px; background: var(--border); border-radius: 2px; }
+  .legend-bar { height: 100%; border-radius: 2px; }
+
+  /* ── Bottom Row ── */
+  .bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  /* Bar Chart */
+  .bar-chart { height: 160px; display: flex; align-items: flex-end; gap: 8px; padding-top: 16px; }
+  .bar-group { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+  .bar-val { font-size: 9px; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .bar {
+    width: 100%; border-radius: 4px 4px 0 0;
+    position: relative; min-height: 4px;
+    transition: opacity 0.2s;
+  }
+  .bar:hover { opacity: 0.8; }
+  .bar-lbl { font-size: 9px; color: var(--muted); font-weight: 600; text-align: center; }
+
+  /* Table */
+  .mini-table { width: 100%; border-collapse: collapse; }
+  .mini-table th {
+    font-size: 9px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    padding: 0 0 10px 0; text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .mini-table td {
+    font-size: 11px; padding: 8px 0;
+    border-bottom: 1px solid rgba(33,38,45,0.6);
+    color: var(--text);
+  }
+  .mini-table tr:last-child td { border-bottom: none; }
+  .rank-badge {
+    width: 20px; height: 20px; border-radius: 5px;
+    background: var(--surface2);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; color: var(--muted);
+  }
+  .rank-badge.gold   { background: rgba(217,119,6,0.2); color: #fbbf24; }
+  .rank-badge.silver { background: rgba(107,114,128,0.2); color: #9ca3af; }
+  .rank-badge.bronze { background: rgba(180,83,9,0.2); color: #f97316; }
+
+  /* Gauge */
+  .gauge-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .gauge-chart { position: relative; width: 140px; height: 80px; overflow: hidden; }
+  .gauge-chart svg { width: 100%; height: 160px; margin-top: -4px; }
+  .gauge-val {
+    font-size: 22px; font-weight: 800; color: #34d399;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+  }
+  .gauge-lbl { font-size: 10px; color: var(--muted); font-weight: 600; text-align: center; text-transform: uppercase; letter-spacing: 0.6px; }
+  .gauge-row { display: flex; justify-content: space-between; width: 100%; margin-top: 10px; }
+  .gauge-stat { text-align: center; }
+  .gauge-stat-val { font-size: 13px; font-weight: 700; color: var(--text); font-family: 'JetBrains Mono', monospace; }
+  .gauge-stat-lbl { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Footer */
+  .footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 10px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .footer-left { font-size: 10px; color: var(--muted); }
+  .footer-left span { color: var(--accent); font-weight: 600; }
+  .page-dots { display: flex; gap: 6px; }
+  .page-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+  .page-dot.active { background: var(--accent); }
+
+  /* watermark */
+  .watermark {
+    position: fixed; bottom: 40px; right: 32px;
+    font-size: 9px; color: rgba(139,148,158,0.3);
+    font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo-icon">📊</div>
+    <div>
+      <h1>Sales & <span>Customer Insights</span> Dashboard</h1>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="badge">POWER BI MOCKUP</span>
+    <span class="date-badge">FY 2024 · All Regions</span>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filters">
+  <span class="filter-label">Filter:</span>
+  <button class="filter-chip active">All Regions</button>
+  <button class="filter-chip">North</button>
+  <button class="filter-chip">South</button>
+  <button class="filter-chip">East</button>
+  <button class="filter-chip">West</button>
+  <button class="filter-chip">Central</button>
+  <div class="filter-divider"></div>
+  <span class="filter-label">Category:</span>
+  <button class="filter-chip active">All</button>
+  <button class="filter-chip">Electronics</button>
+  <button class="filter-chip">Clothing</button>
+  <button class="filter-chip">Food</button>
+  <button class="filter-chip">Furniture</button>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- KPI Row -->
+  <div class="kpi-row">
+    <div class="kpi-card blue">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-value">654.3K</div>
+      <span class="kpi-delta up">▲ 18.4% vs last year</span>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-icon">📈</div>
+      <div class="kpi-label">Total Profit</div>
+      <div class="kpi-value">198.7K</div>
+      <span class="kpi-delta up">▲ 12.1% vs last year</span>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-icon">🛒</div>
+      <div class="kpi-label">Total Orders</div>
+      <div class="kpi-value">200</div>
+      <span class="kpi-delta up">▲ 200 orders in FY2024</span>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-icon">👥</div>
+      <div class="kpi-label">Avg Order Value</div>
+      <div class="kpi-value">3,271</div>
+      <span class="kpi-delta down">▼ 2.3% vs last year</span>
+    </div>
+  </div>
+
+  <!-- Chart Row -->
+  <div class="chart-row">
+
+    <!-- Line Chart: Monthly Revenue -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Monthly Revenue & Profit Trend</div>
+          <div class="chart-sub">January – December 2024</div>
+        </div>
+        <div class="chart-actions">
+          <button class="chart-btn active">Revenue</button>
+          <button class="chart-btn">Profit</button>
+          <button class="chart-btn">Both</button>
+        </div>
+      </div>
+      <div class="line-chart">
+        <svg viewBox="0 0 520 170" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2563eb" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#2563eb" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="profGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Grid lines -->
+          <line x1="0" y1="30"  x2="520" y2="30"  stroke="#21262d" stroke-width="1"/>
+          <line x1="0" y1="60"  x2="520" y2="60"  stroke="#21262d" stroke-width="1"/>
+          <line x1="0" y1="90"  x2="520" y2="90"  stroke="#21262d" stroke-width="1"/>
+          <line x1="0" y1="120" x2="520" y2="120" stroke="#21262d" stroke-width="1"/>
+          <line x1="0" y1="150" x2="520" y2="150" stroke="#21262d" stroke-width="1"/>
+          <!-- Revenue area -->
+          <path d="M20,130 L63,110 L107,95 L150,105 L193,80 L237,70 L280,55 L323,65 L367,45 L410,50 L453,38 L497,42 L497,150 L20,150 Z"
+                fill="url(#revGrad)"/>
+          <!-- Revenue line -->
+          <polyline points="20,130 63,110 107,95 150,105 193,80 237,70 280,55 323,65 367,45 410,50 453,38 497,42"
+                    fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Profit area -->
+          <path d="M20,145 L63,135 L107,125 L150,132 L193,115 L237,108 L280,98 L323,105 L367,90 L410,93 L453,82 L497,85 L497,150 L20,150 Z"
+                fill="url(#profGrad)"/>
+          <!-- Profit line -->
+          <polyline points="20,145 63,135 107,125 150,132 193,115 237,108 280,98 323,105 367,90 410,93 453,82 497,85"
+                    fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4,2"/>
+          <!-- Dots on revenue -->
+          <circle cx="20"  cy="130" r="3.5" fill="#3b82f6" stroke="#0d1117" stroke-width="1.5"/>
+          <circle cx="63"  cy="110" r="3.5" fill="#3b82f6" stroke="#0d1117" stroke-width="1.5"/>
+          <circle cx="107" cy="95"  r="3.5" fill="#3b82f6" stroke="#0d1117" stroke-width="1.5"/>
+          <circle cx="150" cy="105" r="3.5" fill="#3b82f6" stroke="#0d1117" stroke-width="1.5"/>
+          <circle cx="193" cy="80"  r="3.5" fill="#3b82f6" stroke="#0d1117" stroke-width="1.5"/>
+          <circle cx="237" cy="70"  r="3.5" fill="#3b82f6" stroke="#0d1117" stroke-width="1.5"/>
+          <circle cx="280" cy="55"  r="5"   fill="#3b82f6" stroke="#60a5fa" stroke-width="2"/>
+          <circle cx="323" cy="65"  r="3.5" fill="#3b82f6" stroke="#0d1117" stroke-width="1.5"/>
+          <circle cx="367" cy="45"  r="3.5" fill="#3b82f6" stroke="#0d1117" stroke-width="1.5"/>
+          <circle cx="410" cy="50"  r="3.5" fill="#3b82f6" stroke="#0d1117" stroke-width="1.5"/>
+          <circle cx="453" cy="38"  r="3.5" fill="#3b82f6" stroke="#0d1117" stroke-width="1.5"/>
+          <circle cx="497" cy="42"  r="5"   fill="#60a5fa" stroke="#93c5fd" stroke-width="2"/>
+          <!-- Month labels -->
+          <text x="20"  y="168" font-size="9" fill="#8b949e" text-anchor="middle" font-family="Outfit">Jan</text>
+          <text x="63"  y="168" font-size="9" fill="#8b949e" text-anchor="middle" font-family="Outfit">Feb</text>
+          <text x="107" y="168" font-size="9" fill="#8b949e" text-anchor="middle" font-family="Outfit">Mar</text>
+          <text x="150" y="168" font-size="9" fill="#8b949e" text-anchor="middle" font-family="Outfit">Apr</text>
+          <text x="193" y="168" font-size="9" fill="#8b949e" text-anchor="middle" font-family="Outfit">May</text>
+          <text x="237" y="168" font-size="9" fill="#8b949e" text-anchor="middle" font-family="Outfit">Jun</text>
+          <text x="280" y="168" font-size="9" fill="#60a5fa" text-anchor="middle" font-family="Outfit" font-weight="700">Jul</text>
+          <text x="323" y="168" font-size="9" fill="#8b949e" text-anchor="middle" font-family="Outfit">Aug</text>
+          <text x="367" y="168" font-size="9" fill="#8b949e" text-anchor="middle" font-family="Outfit">Sep</text>
+          <text x="410" y="168" font-size="9" fill="#8b949e" text-anchor="middle" font-family="Outfit">Oct</text>
+          <text x="453" y="168" font-size="9" fill="#8b949e" text-anchor="middle" font-family="Outfit">Nov</text>
+          <text x="497" y="168" font-size="9" fill="#60a5fa" text-anchor="middle" font-family="Outfit" font-weight="700">Dec</text>
+          <!-- Tooltip-style callout on peak -->
+          <rect x="246" y="36" width="68" height="22" rx="5" fill="#1c2230" stroke="#3b82f6" stroke-width="1"/>
+          <text x="280" y="51" font-size="10" fill="#60a5fa" text-anchor="middle" font-family="JetBrains Mono" font-weight="600">72,400 SAR</text>
+          <!-- Legend -->
+          <rect x="330" y="15" width="10" height="3" rx="1.5" fill="#3b82f6"/>
+          <text x="344" y="20" font-size="9" fill="#8b949e" font-family="Outfit">Revenue</text>
+          <line x1="390" y1="17" x2="400" y2="17" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="3,2"/>
+          <text x="404" y="20" font-size="9" fill="#8b949e" font-family="Outfit">Profit</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Donut: Category -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Revenue by Category</div>
+          <div class="chart-sub">% share of total</div>
+        </div>
+      </div>
+      <div class="donut-wrap">
+        <div class="donut-chart">
+          <svg viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="52" fill="none" stroke="#21262d" stroke-width="18"/>
+            <!-- Electronics 38% -->
+            <circle cx="70" cy="70" r="52" fill="none" stroke="#3b82f6" stroke-width="18"
+                    stroke-dasharray="124 202" stroke-dashoffset="52" transform="rotate(-90 70 70)"/>
+            <!-- Furniture 28% -->
+            <circle cx="70" cy="70" r="52" fill="none" stroke="#8b5cf6" stroke-width="18"
+                    stroke-dasharray="91 235" stroke-dashoffset="-72" transform="rotate(-90 70 70)"/>
+            <!-- Clothing 20% -->
+            <circle cx="70" cy="70" r="52" fill="none" stroke="#059669" stroke-width="18"
+                    stroke-dasharray="65 261" stroke-dashoffset="-163" transform="rotate(-90 70 70)"/>
+            <!-- Food 14% -->
+            <circle cx="70" cy="70" r="52" fill="none" stroke="#d97706" stroke-width="18"
+                    stroke-dasharray="46 280" stroke-dashoffset="-228" transform="rotate(-90 70 70)"/>
+          </svg>
+          <div class="donut-center">
+            <div class="donut-center-val">654K</div>
+            <div class="donut-center-lbl">Total</div>
+          </div>
+        </div>
+        <div class="donut-legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#3b82f6"></div>
+            <div class="legend-info">
+              <div class="legend-name">Electronics</div>
+              <div class="legend-pct">38% · 248K SAR</div>
+            </div>
+            <div class="legend-bar-wrap"><div class="legend-bar" style="width:100%;background:#3b82f6"></div></div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#8b5cf6"></div>
+            <div class="legend-info">
+              <div class="legend-name">Furniture</div>
+              <div class="legend-pct">28% · 183K SAR</div>
+            </div>
+            <div class="legend-bar-wrap"><div class="legend-bar" style="width:74%;background:#8b5cf6"></div></div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#059669"></div>
+            <div class="legend-info">
+              <div class="legend-name">Clothing</div>
+              <div class="legend-pct">20% · 131K SAR</div>
+            </div>
+            <div class="legend-bar-wrap"><div class="legend-bar" style="width:53%;background:#059669"></div></div>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#d97706"></div>
+            <div class="legend-info">
+              <div class="legend-name">Food</div>
+              <div class="legend-pct">14% · 92K SAR</div>
+            </div>
+            <div class="legend-bar-wrap"><div class="legend-bar" style="width:37%;background:#d97706"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Row -->
+  <div class="bottom-row">
+
+    <!-- Bar Chart: Region -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Revenue by Region</div>
+          <div class="chart-sub">SAR Thousands</div>
+        </div>
+      </div>
+      <div class="bar-chart">
+        <div class="bar-group">
+          <div class="bar-val">158K</div>
+          <div class="bar" style="height:100%;background:linear-gradient(180deg,#3b82f6,#1d4ed8)"></div>
+          <div class="bar-lbl">North</div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-val">142K</div>
+          <div class="bar" style="height:90%;background:linear-gradient(180deg,#6366f1,#4338ca)"></div>
+          <div class="bar-lbl">South</div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-val">128K</div>
+          <div class="bar" style="height:81%;background:linear-gradient(180deg,#8b5cf6,#6d28d9)"></div>
+          <div class="bar-lbl">East</div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-val">119K</div>
+          <div class="bar" style="height:75%;background:linear-gradient(180deg,#06b6d4,#0e7490)"></div>
+          <div class="bar-lbl">West</div>
+        </div>
+        <div class="bar-group">
+          <div class="bar-val">107K</div>
+          <div class="bar" style="height:68%;background:linear-gradient(180deg,#10b981,#047857)"></div>
+          <div class="bar-lbl">Central</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Products Table -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Top Products by Revenue</div>
+          <div class="chart-sub">Best performers 2024</div>
+        </div>
+      </div>
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Product</th>
+            <th>Revenue</th>
+            <th>Margin</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="rank-badge gold">1</span></td>
+            <td>Laptop</td>
+            <td style="color:#60a5fa;font-family:'JetBrains Mono',monospace;font-size:10px">98.4K</td>
+            <td style="color:#34d399;font-size:10px">32%</td>
+          </tr>
+          <tr>
+            <td><span class="rank-badge silver">2</span></td>
+            <td>Desk</td>
+            <td style="color:#60a5fa;font-family:'JetBrains Mono',monospace;font-size:10px">72.1K</td>
+            <td style="color:#34d399;font-size:10px">28%</td>
+          </tr>
+          <tr>
+            <td><span class="rank-badge bronze">3</span></td>
+            <td>Smartphone</td>
+            <td style="color:#60a5fa;font-family:'JetBrains Mono',monospace;font-size:10px">65.8K</td>
+            <td style="color:#34d399;font-size:10px">25%</td>
+          </tr>
+          <tr>
+            <td><span class="rank-badge">4</span></td>
+            <td>Monitor</td>
+            <td style="color:#60a5fa;font-family:'JetBrains Mono',monospace;font-size:10px">48.3K</td>
+            <td style="color:#fbbf24;font-size:10px">21%</td>
+          </tr>
+          <tr>
+            <td><span class="rank-badge">5</span></td>
+            <td>Cabinet</td>
+            <td style="color:#60a5fa;font-family:'JetBrains Mono',monospace;font-size:10px">41.6K</td>
+            <td style="color:#fbbf24;font-size:10px">19%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Profit Margin Gauge -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Profit Margin</div>
+          <div class="chart-sub">Overall performance</div>
+        </div>
+      </div>
+      <div class="gauge-wrap">
+        <div class="gauge-chart">
+          <svg viewBox="0 0 140 80">
+            <!-- Background arc -->
+            <path d="M 14,76 A 56,56 0 0,1 126,76" fill="none" stroke="#21262d" stroke-width="14" stroke-linecap="round"/>
+            <!-- Red zone 0-20% -->
+            <path d="M 14,76 A 56,56 0 0,1 36,27" fill="none" stroke="#dc2626" stroke-width="14" stroke-linecap="round" opacity="0.4"/>
+            <!-- Yellow zone 20-40% -->
+            <path d="M 36,27 A 56,56 0 0,1 83,14" fill="none" stroke="#d97706" stroke-width="14" stroke-linecap="round" opacity="0.4"/>
+            <!-- Green zone 40-100% -->
+            <path d="M 83,14 A 56,56 0 0,1 126,76" fill="none" stroke="#059669" stroke-width="14" stroke-linecap="round" opacity="0.3"/>
+            <!-- Needle at ~30% (actual value) -->
+            <path d="M 14,76 A 56,56 0 0,1 59,18" fill="none" stroke="#34d399" stroke-width="14" stroke-linecap="round"/>
+            <!-- Center circle -->
+            <circle cx="70" cy="76" r="6" fill="#34d399"/>
+            <circle cx="70" cy="76" r="3" fill="#0d1117"/>
+          </svg>
+        </div>
+        <div class="gauge-val">30.4%</div>
+        <div class="gauge-lbl">Profit Margin</div>
+        <div class="gauge-row">
+          <div class="gauge-stat">
+            <div class="gauge-stat-val" style="color:#60a5fa">654K</div>
+            <div class="gauge-stat-lbl">Revenue</div>
+          </div>
+          <div class="gauge-stat">
+            <div class="gauge-stat-val" style="color:#a78bfa">199K</div>
+            <div class="gauge-stat-lbl">Profit</div>
+          </div>
+          <div class="gauge-stat">
+            <div class="gauge-stat-val" style="color:#34d399">10</div>
+            <div class="gauge-stat-lbl">Customers</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <div class="footer-left">Data Source: <span>Sales_Dashboard_Data.xlsx</span> · Last Refreshed: <span>Dec 2024</span> · Built with <span>Power BI</span></div>
+  <div class="page-dots">
+    <div class="page-dot active"></div>
+    <div class="page-dot"></div>
+    <div class="page-dot"></div>
+  </div>
+</div>
+
+<div class="watermark">Aryam Mohammed · MIS Graduation Project</div>
+
+</body>
+</html>
